@@ -1,0 +1,54 @@
+NOTE: queries are based on db model as defined in image
+
+1. Find out the PG-13 rated comedy movies. DO NOT use the film_list table.
+-> SELECT m.* 
+     FROM movie m 
+     JOIN movie_category c
+     ON m.id = c.movie_id
+     WHERE c.category_id = (SELECT id FROM category WHERE catetgory.name = “comedy”)
+     AND m.certificate = (SELECT id FROM certificate WHERE name = “PG-13”);
+
+2. Find out the top 3 rented horror movies.
+-> SELECT m.* 
+     FROM movie m 
+     JOIN movie_category c
+     ON m.id = c.movie_id
+     JOIN (SELECT movie_id, avg(rating) as rating FROM rating GROUP BY movie_id) r
+     ON m.id = r.movie_id     
+     WHERE c.category_id = (SELECT id FROM category WHERE catetgory.name = “horror”)
+     AND m.id IN (SELECT movie_id FROM rental)
+     ORDER BY r.rating desc
+     LIMIT 3;
+
+3. Find out the list of customers from India who have rented sports movies.
+-> SELECT u.* FROM user u
+     JOIN rental r ON u.id = r.user_id
+     WHERE u.location = “India”
+     AND r.movie_id IN (
+     	SELECT m.* 
+     	FROM movie m 
+     	JOIN movie_category c
+     	ON m.id = c.movie_id
+    	WHERE c.category_id = (SELECT id FROM category WHERE catetgory.name = “sport”)
+     );
+
+
+4. Find out the list of customers from Canada who have rented “NICK WAHLBERG” movies.
+
+->  SELECT u.* FROM user u
+     JOIN rental r ON u.id = r.user_id
+     WHERE u.location = “Canada”
+     AND r.movie_id IN (
+     	SELECT m.* 
+     	FROM movie m 
+     	JOIN cast c
+     	ON m.id = c.movie_id
+    	WHERE c.actor_id = (SELECT id FROM actor WHERE actor.name = “Nick Wahlberg”)
+     );
+
+5.Find out the number of movies in which “SEAN WILLIAMS” acted.
+-> SELECT count(*) as total_movies
+     FROM movie m
+     JOIN cast c ON m.id = c.movie_id
+     WHERE c.actor_id = (SELECT id FROM actor WHERE actor.name = “Sean Williams”);
+     
